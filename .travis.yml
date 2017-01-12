@@ -1,0 +1,27 @@
+guage: python
+python:
+    - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: required
+dist: trusty
+cache:
+       pip:true
+       apt:true
+directories:
+             - "~/.platformio"
+env:
+- PLATFORMIO_CI_SRC=src/
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -q
+  - sudo apt-get install g++-5 -y
+install:
+        sudo  pip install -U platformio
+script:
+         - mkdir build
+	 - cd build
+	 - cmake -DCMAKE_C_COMPILER=gcc-5 ../ 
+	 - make
+         - cd ..
+         - platformio ci --board=uno
