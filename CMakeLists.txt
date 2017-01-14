@@ -9,8 +9,8 @@ option(test "Build all tests." OFF)
 
 file(GLOB SRC "src/*.c")
 file(GLOB HEADER "src/*.h")
-
-
+file(GLOB MAIN "main.c")
+file(GLOB MAIN_HEADER "main.h")
 
 if (test)
  include(ExternalProject)
@@ -27,8 +27,9 @@ if (test)
  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
  enable_testing()
 
- file(GLOB TESTS "/tests/*.cpp")
- add_executable(runUnitTests  ${TESTS} ${SRC}  ${HEADER})
+ file(GLOB TESTS "${CMAKE_SOURCE_DIR}/tests/main.cpp")
+ MESSAGE(STATUS ${TESTS})
+ add_executable(runUnitTests  ${TESTS} ${SRC} ${HEADER})
  target_link_libraries(runUnitTests gtest gtest_main pthread)
  add_test(NAME first-test COMMAND runUnitTests)
 
@@ -36,4 +37,4 @@ if (test)
 endif()
 
 
-add_executable(thread_manager ${SRC} ${HEADER})
+add_executable(thread_manager ${MAIN} ${MAIN_HEADER} ${SRC} ${HEADER})
