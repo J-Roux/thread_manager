@@ -8,7 +8,7 @@ set(CMAKE_C_FLAGS ${CMAKE_C_FLAG} "-std=c99")
 option(test "Build all tests." OFF)
 
 file(GLOB SRC "src/*.c")
-file(GLOB HEADER "src/*.c")
+file(GLOB HEADER "src/*.h")
 
 
 
