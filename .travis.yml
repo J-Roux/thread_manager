@@ -21,7 +21,9 @@ install:
 script:
          - mkdir build
          - cd build
-         - cmake -DCMAKE_C_COMPILER=gcc-5 ../ 
+         - cmake -Dtest=ON -DCMAKE_C_COMPILER=gcc-5 ../ 
          - make
+         - make test
+         - ./runUnitTests
          - cd ..
          - platformio ci --board=uno
