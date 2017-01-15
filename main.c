@@ -4,23 +4,29 @@
 
 
 _THREAD(f1)
-   static int a = 5;
-   printf("\n%u", _id);
-   YIELD; //@0x7fffffffe500
-   printf("\nf1 one = %u", _id);
-   YIELD;
-   printf("\nf1 two = %u", a);
-   end_thread(_id);
+    DECLARE
+        uint8_t a;
+    END_DECLARE
+    THIS.a = 5;
+    printf("\n%u", THIS.id);
+    YIELD; //@0x7fffffffe500
+    printf("\nf1 one = %u", THIS.id);
+    YIELD;
+    printf("\nf1 two = %u", THIS.a);
+    END_THREAD;
 }
 
 _THREAD(f2)
-   static int b = 6;
-   printf("\n%u", _id);
-   YIELD;//@0x7fffffffe500
-   printf("\nf2 one = %u", _id);
-   YIELD;
-   printf("\nf2 two = %u", b);
-   end_thread(_id);
+    DECLARE
+        uint8_t b;
+    END_DECLARE
+    THIS.b = 6;
+    printf("\n%u", THIS.id);
+    YIELD;//@0x7fffffffe500
+    printf("\nf2 one = %u",THIS.id);
+    YIELD;
+    printf("\nf2 two = %u", THIS.b);
+    END_THREAD;
 }
 
 

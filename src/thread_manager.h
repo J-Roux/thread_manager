@@ -2,6 +2,7 @@
 #define _THREAD_MANAGER
 
 #include "thread_manager_config.h"
+#include "stack.h"
 #include <setjmp.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -12,11 +13,18 @@ typedef jmp_buf * jmp_buf_ptr;
 
 #define _THREAD(NAME) void NAME(uint8_t id, int argc, void* argv) \
 { \
-    uint8_t _id = id; \
     static jmp_buf local;  \
-    add_context(&local, id);
+    add_context(&local, id); \
+
+#define DECLARE   struct {  \
+    uint8_t id; \
 
 
+
+#define END_DECLARE } context; \
+    context.id = id; \
+
+#define THIS context
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,10 +45,13 @@ jmp_buf_ptr get_context(uint8_t id);
 
 void end_thread(uint8_t id);
 
-#define YIELD     if(setjmp(local) == 0) \
-                    longjmp(*get_kernel_context(), __COUNTER__)
+#define YIELD     if(setjmp(local) == 0) {\
+                    push((uint8_t *)&context, sizeof(context)); \
+                    longjmp(*get_kernel_context(), __COUNTER__); \
+                  }else{                                         \
+                    pop((uint8_t *)&context, sizeof(context));}             \
 
-#define END_THREAD end_thread(id)
+#define END_THREAD end_thread(context.id)
 #ifdef __cplusplus
 }
 #endif

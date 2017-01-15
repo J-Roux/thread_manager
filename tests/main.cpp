@@ -14,19 +14,23 @@
 std::vector<std::string> message_queue;
 
 _THREAD(f1)
-   YIELD;
-   message_queue.push_back("f1 one");
-   YIELD;
-   message_queue.push_back("f1 two");
-   END_THREAD;
+    DECLARE
+    END_DECLARE
+    YIELD;
+    message_queue.push_back("f1 one");
+    YIELD;
+    message_queue.push_back("f1 two");
+    END_THREAD;
 }
 
 _THREAD(f2)
-   YIELD;
-   message_queue.push_back("f2 one");
-   YIELD;
-   message_queue.push_back("f2 two");
-   END_THREAD;
+    DECLARE
+    END_DECLARE
+    YIELD;
+    message_queue.push_back("f2 one");
+    YIELD;
+    message_queue.push_back("f2 two");
+    END_THREAD;
 }
 
 
