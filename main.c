@@ -2,37 +2,34 @@
 
 
 
-REGISTER(f1);
-REGISTER(f2);
 
-
-
-
-void f1()
-{
-   YIELD(_f1);
-   printf("\nf1 one");
-   YIELD(_f1);
-   printf("\nf1 two");
-   END_THREAD;
+_THREAD(f1)
+   static int a = 5;
+   printf("\n%u", _id);
+   YIELD; //@0x7fffffffe500
+   printf("\nf1 one = %u", _id);
+   YIELD;
+   printf("\nf1 two = %u", a);
+   end_thread(_id);
 }
 
-void f2()
-{
-   YIELD(_f2);
-   printf("\nf2 one");
-   YIELD(_f2);
-   printf("\nf2 two");
-   END_THREAD;
+_THREAD(f2)
+   static int b = 6;
+   printf("\n%u", _id);
+   YIELD;//@0x7fffffffe500
+   printf("\nf2 one = %u", _id);
+   YIELD;
+   printf("\nf2 two = %u", b);
+   end_thread(_id);
 }
 
 
 
 int main()
 {
-    jmp_buf_ptr constexts[2] = { &_f1, &_f2};
-    Func  func_array[2] = { &f1, &f2};
-    kernel(constexts,func_array, 2);
+    create_thread(f1, 0, 0);
+    create_thread(f2, 0, 0);
+    thread_manager();
     puts("\nend thread manager");
     return 0;
 }
