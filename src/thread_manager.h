@@ -3,6 +3,7 @@
 
 #include "stack.h"
 #include "thread_manager_config.h"
+#include <stdbool.h>
 typedef void(*func_ptr)();
 
 
@@ -15,6 +16,9 @@ void create_thread(func_ptr func);
 void load_context(uint8_t* ptr, uint8_t size);
 void save_context(uint8_t* ptr, uint8_t size);
 void thread_manager();
+void terminate_thread();
+bool is_end();
+void set_end(bool val);
 
 #ifdef __cplusplus
 }

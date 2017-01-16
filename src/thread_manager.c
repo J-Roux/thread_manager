@@ -15,11 +15,19 @@ typedef struct
 } thread_context;
 
 
+
+
 static uint8_t pointer = 0;
 
 static thread_context threads[MAX_THREAD_COUNT];
 
 static uint8_t current_id;
+
+void terminate_thread()
+{
+    threads[get_id()].state = END;
+}
+
 
 uint8_t get_id()
 {
@@ -63,12 +71,25 @@ void create_thread(func_ptr func)
     }
 }
 
+bool end[MAX_THREAD_COUNT];
+
+bool is_end()
+{
+    return end[current_id];
+}
+
+void set_end(bool val)
+{
+    end[current_id] = val;
+}
 
 void thread_manager()
 {
+    for (int i = 0; i < MAX_THREAD_COUNT; end[i]= false, i++);
     for(int i = 0, j =0; j < 6; i = (++i % MAX_THREAD_COUNT), j++)
     {
         current_id = i;
-        threads[i].ptr();
+        if(threads[i].state != END)
+            threads[i].ptr();
     }
 }
