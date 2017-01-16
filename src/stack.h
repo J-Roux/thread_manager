@@ -1,7 +1,7 @@
 #ifndef _STACK_H
 #define _STACK_H
 #include <stdint.h>
-
+#include "thread_manager.h"
 typedef int16_t ptr_size;
 
 typedef enum

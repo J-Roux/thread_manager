@@ -1,6 +1,5 @@
 #include "thread_manager.h"
 
-#include <time.h>
 typedef enum
 {
     NOT_INIT,
@@ -13,87 +12,63 @@ typedef struct
 {
     func_ptr ptr;
     thread_state state;
-    uint8_t argc;
-    void * argv;
 } thread_context;
 
 
+static uint8_t pointer = 0;
 
-thread_context threads[MAX_THREAD_COUNT];
-static jmp_buf_ptr contexts[MAX_THREAD_COUNT];
-uint8_t pointer = 0;
+static thread_context threads[MAX_THREAD_COUNT];
 
-jmp_buf kernel_context;
+static uint8_t current_id;
 
-int _end_thread = 0;
+uint8_t get_id()
+{
+    return current_id;
+}
+
+thread_state get_thread_state()
+{
+    return threads[current_id].state;
+}
+
+void set_thread_state(thread_state state)
+{
+    threads[current_id].state = state;
+}
 
 
+void save_context(uint8_t* ptr, uint8_t size)
+{
+    push(ptr, size);
+}
+
+void load_context(uint8_t* ptr, uint8_t size)
+{
+    if(get_thread_state() != NOT_INIT)
+    {
+        pop(ptr, size);
+    }
+    else
+        set_thread_state(RUNNING);
+}
 
 
-uint8_t create_thread(func_ptr ptr, uint8_t argc, void* argv)
+void create_thread(func_ptr func)
 {
     if(pointer < MAX_THREAD_COUNT)
     {
-        threads[pointer].argc = argc;
-        threads[pointer].argv = argv;
-        threads[pointer].ptr = ptr;
+        threads[pointer].ptr = func;
         threads[pointer].state = NOT_INIT;
-        return pointer++;
-    }
-    else
-    {
-        return false;
+        pointer++;
     }
 }
 
-
-void add_context(jmp_buf_ptr context, uint8_t id)
-{
-    contexts[id] = context;
-}
-
-jmp_buf_ptr get_context(uint8_t id)
-{
-    return contexts[id];
-}
-
-jmp_buf_ptr get_kernel_context()
-{
-    return &kernel_context;
-}
-
-
-
-
-
-void end_thread(uint8_t id)
-{
-    threads[id].state = END;
-    longjmp(*get_kernel_context(), __COUNTER__);
-}
 
 void thread_manager()
 {
-    for(int i =0;; i =(++i % pointer))
+    for(int i = 0, j =0; j < 6; i = (++i % MAX_THREAD_COUNT), j++)
     {
-        thread_context thread = threads[i];
-        switch (thread.state)
-        {
-        case NOT_INIT:
-            threads[i].state = RUNNING;
-            if (setjmp(kernel_context) == 0)
-                thread.ptr(i, thread.argc, thread.argv);
-            break;
-        case RUNNING:
-            if (setjmp(kernel_context) == 0)
-                longjmp(*get_context(i), __COUNTER__);
-            break;
-        case END:
-            _end_thread++;
-            break;
-        }
-
-        if(_end_thread == 2)
-            break;
+        current_id = i;
+        threads[i].ptr();
     }
 }

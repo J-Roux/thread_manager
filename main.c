@@ -1,40 +1,75 @@
-#include "main.h"
+#include "src/thread_manager.h"
+#include <stdio.h>
 
 
 
 
-_THREAD(f1)
-    DECLARE
+void f1()
+{
+    struct {
+        uint32_t pc;
         uint8_t a;
-    END_DECLARE
-    THIS.a = 5;
-    printf("\n%u", THIS.id);
-    YIELD; //@0x7fffffffe500
-    printf("\nf1 one = %u", THIS.id);
-    YIELD;
-    printf("\nf1 two = %u", THIS.a);
-    END_THREAD;
+
+    } _thread_context;
+    _thread_context.pc = 0;
+    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
+    switch (_thread_context.pc)
+    {
+    case 0:
+    {
+        _thread_context.a = 7;
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+
+        printf("\n%u", _thread_context.a);
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        printf("\n%u", _thread_context.a);
+    }
+    }
 }
 
-_THREAD(f2)
-    DECLARE
-        uint8_t b;
-    END_DECLARE
-    THIS.b = 6;
-    printf("\n%u", THIS.id);
-    YIELD;//@0x7fffffffe500
-    printf("\nf2 one = %u",THIS.id);
-    YIELD;
-    printf("\nf2 two = %u", THIS.b);
-    END_THREAD;
+void f2()
+{
+
+    struct {
+        uint32_t pc;
+        uint8_t a;
+
+    } _thread_context;
+    _thread_context.pc = 0;
+    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
+    switch (_thread_context.pc)
+    {
+    case 0:
+    {
+        _thread_context.a = 5;
+
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        printf("\n%u", _thread_context.a);
+
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        printf("\n%u", _thread_context.a);
+    }
+    }
 }
 
 
 
 int main()
 {
-    create_thread(f1, 0, 0);
-    create_thread(f2, 0, 0);
+    create_thread(&f1);
+    create_thread(&f2);
     thread_manager();
     puts("\nend thread manager");
     return 0;
