@@ -2,38 +2,74 @@
 
 
 
-REGISTER(f1);
-REGISTER(f2);
-
 
 
 
 void f1()
 {
-   YIELD(_f1);
-   Serial.println("f1 one");
-   YIELD(_f1);
-   Serial.println("f1 two");
-   END_THREAD;
+    struct {
+        uint32_t pc;
+        uint8_t a;
+
+    } _thread_context;
+    _thread_context.pc = 0;
+    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
+    switch (_thread_context.pc)
+    {
+    case 0:
+    {
+        _thread_context.a = 7;
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+
+        Serial.println(_thread_context.a);
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        Serial.println( _thread_context.a);
+    }
+    }
 }
+
 
 void f2()
 {
-   YIELD(_f2);
-   Serial.println("f2 one");
-   YIELD(_f2);
-   Serial.println("f2 two");
-   END_THREAD;
+    struct {
+        uint32_t pc;
+        uint8_t a;
+
+    } _thread_context;
+    _thread_context.pc = 0;
+    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
+    switch (_thread_context.pc)
+    {
+    case 0:
+    {
+        _thread_context.a = 5;
+
+    }
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        Serial.println( _thread_context.a);
+    }
+
+    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
+    case __LINE__:
+    {
+        Serial.println(_thread_context.a);
+    }
+    }
 }
-
-
 
 void setup()
 {
-    Serial.begin(9800);
-    jmp_buf_ptr constexts[2] = { &_f1, &_f2};
-    Func  func_array[2] = { &f1, &f2};
-    kernel(constexts,func_array, 2);
+    create_thread(&f1);
+    create_thread(&f2);
+    thread_manager();
     Serial.println("end kernel");
     return 0;
 }

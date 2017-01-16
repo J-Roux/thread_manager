@@ -89,6 +89,6 @@ TEST(thread_manager, normal_workflow)
     };
 
     EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
-
+    message_queue.clear();
 
 }
