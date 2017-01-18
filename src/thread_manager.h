@@ -6,6 +6,22 @@
 #include <stdbool.h>
 typedef void(*func_ptr)();
 
+#define THIS _thread_context
+#define DECLARE_AREA struct { \
+    uint32_t pc \
+
+#define END_DECLARE_AREA } _thread_context;\
+_thread_context.pc = 0;\
+load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
+
+#define BEGIN_THREAD if(_thread_context.pc <= 0) {
+
+
+#define END_THREAD     set_end(true); terminate_thread(); }
+
+
+#define YIELD  _thread_context.pc = __LINE__;  save_context((uint8_t*)&_thread_context, sizeof(_thread_context));} else if( _thread_context.pc == __LINE__) {
+
 
 #ifdef __cplusplus
 extern "C" {

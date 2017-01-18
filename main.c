@@ -5,41 +5,20 @@
 
 bool is_init[MAX_THREAD_COUNT];
 
-#define THIS _thread_context
-#define DECLARE_AREA struct { \
-    uint32_t pc \
 
-#define END_DECLARE_AREA } _thread_context;\
-_thread_context.pc = 0;\
-load_context((uint8_t*)&_thread_context, sizeof(_thread_context))\
 
 void f1()
 {
     DECLARE_AREA;
         uint8_t a;
     END_DECLARE_AREA;
-    switch (_thread_context.pc)
-    {
-    case 0:
-    {
+    BEGIN_THREAD;
         THIS.a = 7;
-    }
-    case __LINE__: _thread_context.pc = __LINE__ + 2;
-        save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
-
+    YIELD;
         printf("\n%u", THIS.a);
-    }
-    case __LINE__: _thread_context.pc = __LINE__ + 2;
-        save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
+    YIELD;
         printf("\n%u", THIS.a);
-    }
-    }
-    set_end(true);
-    terminate_thread();
+    END_THREAD;
 }
 
 void f3()
@@ -91,6 +70,7 @@ void f2()
 
     case __LINE__: _thread_context.pc = __LINE__;
         save_context((uint8_t*)&_thread_context, sizeof(_thread_context));
+        is_init[get_id()] = false;
         f3();
         if(is_end())
         {
@@ -116,6 +96,8 @@ void f2()
 
 int main()
 {
+    is_init[0] = false;
+    is_init[1] = false;
     create_thread(&f1);
     create_thread(&f2);
     thread_manager();
