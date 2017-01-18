@@ -28,13 +28,13 @@ extern "C" {
 #endif
 
 uint8_t get_id();
-void create_thread(func_ptr func);
-void load_context(uint8_t* ptr, uint8_t size);
-void save_context(uint8_t* ptr, uint8_t size);
+void create_thread(const func_ptr func);
+void load_context(uint8_t* ptr,const uint8_t size);
+void save_context(const uint8_t* ptr,const uint8_t size);
 void thread_manager();
 void terminate_thread();
 bool is_end();
-void set_end(bool val);
+void set_end(const bool val);
 
 #ifdef __cplusplus
 }

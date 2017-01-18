@@ -17,8 +17,8 @@ typedef enum
 extern "C" {
 #endif
 
-RESULT push(uint8_t *ptr, ptr_size size);
-RESULT pop(uint8_t *ptr, ptr_size size);
+RESULT push(const uint8_t *ptr, const ptr_size size);
+RESULT pop(uint8_t *ptr, const ptr_size size);
 
 
 

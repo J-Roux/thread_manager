@@ -3,8 +3,8 @@
 #include <string.h>
 static uint8_t data[MAX_THREAD_COUNT][STACK_SIZE];
 static ptr_size pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
-
-//void reset() { pointer = STACK_START_ADDRESS; }
+static ptr_size context_pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
+void reset() { pointer[get_id()] = STACK_START_ADDRESS; }
 
 typedef enum
 {
@@ -12,7 +12,7 @@ typedef enum
     POP
 } COMPARE_TYPE;
 
-RESULT range_check(ptr_size size, COMPARE_TYPE type)
+RESULT range_check(const ptr_size size, const COMPARE_TYPE type)
 {
     RESULT result = SUCCESS;
     if(type == PUSH)
@@ -29,7 +29,7 @@ RESULT range_check(ptr_size size, COMPARE_TYPE type)
 }
 
 
-RESULT push(uint8_t *ptr, ptr_size size)
+RESULT push(const uint8_t *ptr, const ptr_size size)
 {
   RESULT result = range_check(size, PUSH);
   if(result == SUCCESS)
@@ -41,7 +41,7 @@ RESULT push(uint8_t *ptr, ptr_size size)
   return result;
 }
 
-RESULT pop(uint8_t *ptr, ptr_size size)
+RESULT pop(uint8_t *ptr,const ptr_size size)
 {
   RESULT result = range_check( size, POP);
   if(result == SUCCESS)

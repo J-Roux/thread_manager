@@ -39,18 +39,18 @@ thread_state get_thread_state()
     return threads[current_id].state;
 }
 
-void set_thread_state(thread_state state)
+void set_thread_state(const thread_state state)
 {
     threads[current_id].state = state;
 }
 
 
-void save_context(uint8_t* ptr, uint8_t size)
+void save_context(const uint8_t* ptr, const uint8_t size)
 {
     push(ptr, size);
 }
 
-void load_context(uint8_t* ptr, uint8_t size)
+void load_context(uint8_t* ptr, const uint8_t size)
 {
     if(get_thread_state() != NOT_INIT)
     {
@@ -61,7 +61,7 @@ void load_context(uint8_t* ptr, uint8_t size)
 }
 
 
-void create_thread(func_ptr func)
+void create_thread(const func_ptr func)
 {
     if(pointer < MAX_THREAD_COUNT)
     {
@@ -78,7 +78,7 @@ bool is_end()
     return end[current_id];
 }
 
-void set_end(bool val)
+void set_end(const bool val)
 {
     end[current_id] = val;
 }
