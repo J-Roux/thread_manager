@@ -4,7 +4,8 @@
 static uint8_t data[MAX_THREAD_COUNT][STACK_SIZE];
 static ptr_size pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
 static ptr_size context_pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
-void reset() { pointer[get_id()] = STACK_START_ADDRESS; }
+
+void reset() { context_pointer[get_id()] = STACK_START_ADDRESS; }
 
 typedef enum
 {
@@ -41,18 +42,32 @@ RESULT push(const uint8_t *ptr, const ptr_size size)
   return result;
 }
 
-RESULT pop(uint8_t *ptr,const ptr_size size)
+
+
+RESULT pop(const ptr_size size)
 {
-  RESULT result = range_check( size, POP);
-  if(result == SUCCESS)
-  {
-      pointer[get_id()] -= size - 1;
-      memcpy(ptr, data[get_id()] + pointer[get_id()], size);
-      (pointer[get_id()])--;
-  }
-  return result;
+    RESULT result = range_check( size, POP);
+    if(result == SUCCESS)
+    {
+        pointer[get_id()] -= size - 1;
+        (pointer[get_id()])--;
+    }
 }
 
+RESULT load(uint8_t* ptr, const ptr_size size)
+{
+    RESULT result = range_check( size, POP);
+    if(result == SUCCESS)
+    {
+        ++(context_pointer[get_id()]);
+        memcpy(ptr, data[get_id()] + context_pointer[get_id()], size);
+        context_pointer[get_id()] += size - 1;
+    }
+    return result;
+}
 
-
+bool is_next_stack_frame_exist()
+{
+    return context_pointer[get_id()] < pointer[get_id()];
+}
 

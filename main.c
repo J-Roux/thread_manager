@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 
-bool is_init[MAX_THREAD_COUNT];
 
 
 
@@ -32,9 +31,9 @@ void f3()
         printf("\n%u", THIS.b);
     YIELD;
         printf("\n%u", THIS.b);
-
+        set_end(true);
+        pop(sizeof(_thread_context));
     }
-    set_end(true);
 }
 
 void f2()
@@ -46,15 +45,11 @@ void f2()
         THIS.a = 5;
     YIELD;
         printf("\n%u", THIS.a);
-
-        _thread_context.pc = __LINE__;
+        _thread_context.pc = __LINE__; save_context((uint8_t*)&_thread_context, sizeof(_thread_context));} else if( _thread_context.pc == __LINE__) { _thread_context.pc = __LINE__;
         save_context((uint8_t*)&_thread_context, sizeof(_thread_context));
-        is_init[get_id()] = false;
         f3();
-        if(is_end())
+        if(!is_end())
         {
-            set_end(false);
-            _thread_context.pc = __LINE__ + 3;
         }
         load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
    YIELD;
@@ -66,8 +61,6 @@ void f2()
 
 int main()
 {
-    is_init[0] = false;
-    is_init[1] = false;
     create_thread(&f1);
     create_thread(&f2);
     thread_manager();

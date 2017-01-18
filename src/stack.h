@@ -1,6 +1,7 @@
 #ifndef _STACK_H
 #define _STACK_H
 #include <stdint.h>
+#include <stdbool.h>
 #include "thread_manager.h"
 typedef int16_t ptr_size;
 
@@ -17,8 +18,11 @@ typedef enum
 extern "C" {
 #endif
 
+
+RESULT load(uint8_t* ptr, const ptr_size size);
 RESULT push(const uint8_t *ptr, const ptr_size size);
-RESULT pop(uint8_t *ptr, const ptr_size size);
+RESULT pop(const ptr_size size);
+bool is_next_stack_frame_exist();
 
 
 

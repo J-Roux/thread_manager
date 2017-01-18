@@ -34,12 +34,12 @@ uint8_t get_id()
     return current_id;
 }
 
-thread_state get_thread_state()
+static thread_state get_thread_state()
 {
     return threads[current_id].state;
 }
 
-void set_thread_state(const thread_state state)
+static void set_thread_state(const thread_state state)
 {
     threads[current_id].state = state;
 }
@@ -50,14 +50,13 @@ void save_context(const uint8_t* ptr, const uint8_t size)
     push(ptr, size);
 }
 
+
 void load_context(uint8_t* ptr, const uint8_t size)
 {
-    if(get_thread_state() != NOT_INIT)
-    {
-        pop(ptr, size);
-    }
-    else
+    if(get_thread_state() == NOT_INIT)
         set_thread_state(RUNNING);
+    if( is_next_stack_frame_exist())
+        load(ptr, size);
 }
 
 
@@ -71,7 +70,7 @@ void create_thread(const func_ptr func)
     }
 }
 
-bool end[MAX_THREAD_COUNT];
+static bool end[MAX_THREAD_COUNT];
 
 bool is_end()
 {
@@ -86,7 +85,7 @@ void set_end(const bool val)
 void thread_manager()
 {
     for (int i = 0; i < MAX_THREAD_COUNT; end[i]= false, i++);
-    for(int i = 0, j =0; j < 6; i = (++i % MAX_THREAD_COUNT), j++)
+    for(int i = 0, j =0; j < 9; i = (++i % MAX_THREAD_COUNT), j++)
     {
         current_id = i;
         if(threads[i].state != END)

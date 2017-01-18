@@ -17,7 +17,7 @@ load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 #define BEGIN_THREAD if(_thread_context.pc <= 0) {
 
 
-#define END_THREAD     set_end(true); terminate_thread(); }
+#define END_THREAD     set_end(true); pop(sizeof(_thread_context)); terminate_thread(); }
 
 
 #define YIELD  _thread_context.pc = __LINE__;  save_context((uint8_t*)&_thread_context, sizeof(_thread_context));} else if( _thread_context.pc == __LINE__) {
