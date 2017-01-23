@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <vector>
 #include <string>
-
+#include <functional>
 
 
 
@@ -19,11 +19,11 @@ void f1()
         uint8_t a;
     END_DECLARE_AREA;
     BEGIN_THREAD
-       _thread_context.a = 7;
+       THIS.a = 7;
     YIELD;
-        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(_thread_context.a) );
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
     YIELD;
-        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(_thread_context.a) );
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
     END_THREAD;
 }
 
@@ -33,11 +33,11 @@ void f2()
         uint8_t a;
     END_DECLARE_AREA;
     BEGIN_THREAD
-       _thread_context.a = 5;
+        THIS.a = 5;
     YIELD;
-        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(_thread_context.a) );
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
     YIELD;
-        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(_thread_context.a) );
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
     END_THREAD;
 }
 
@@ -56,8 +56,69 @@ TEST(thread_manager, normal_workflow)
         "f2 5",
         "end kernel"
     };
-
     EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
     message_queue.clear();
-
 }
+
+void thread1()
+{
+    DECLARE_AREA;
+        uint8_t a;
+    END_DECLARE_AREA;
+    BEGIN_THREAD
+       THIS.a = 1;
+    YIELD;
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    YIELD;
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    END_THREAD;
+}
+
+void nested_function()
+{
+    DECLARE_AREA;
+            uint8_t a;
+    END_DECLARE_AREA;
+    BEGIN_THREAD
+        THIS.a = 3;
+    YIELD;
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    YIELD;
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    END_THREAD;
+}
+
+void thread2()
+{
+    DECLARE_AREA;
+        uint8_t a;
+    END_DECLARE_AREA;
+    BEGIN_THREAD
+       THIS.a = 2;
+    YIELD;
+        nested_function();
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    YIELD;
+        message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+    END_THREAD;
+}
+
+
+TEST(thread_manager, call_func_into_thread)
+{
+    create_thread(&f1);
+    create_thread(&f2);
+    thread_manager();
+    message_queue.push_back("end kernel");
+    std::vector<std::string> expected_message_queue = {
+        "f1 1",
+        "f2 1",
+        "f1 2",
+        "f2 2",
+        "end kernel"
+    };
+    EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
+    message_queue.clear();
+}
+
+

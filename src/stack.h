@@ -11,7 +11,7 @@ typedef enum
     STACK_OVERFLOW
 } RESULT;
 
-#define STACK_SIZE 124
+#define STACK_SIZE 32
 
 #define STACK_START_ADDRESS -1
 #ifdef __cplusplus
@@ -22,7 +22,9 @@ extern "C" {
 RESULT load(uint8_t* ptr, const ptr_size size);
 RESULT push(const uint8_t *ptr, const ptr_size size);
 RESULT pop(const ptr_size size);
-bool is_next_stack_frame_exist();
+void reset();
+bool is_next_stack_frame_exist(const uint8_t size);
+
 
 
 

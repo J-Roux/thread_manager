@@ -12,6 +12,8 @@ typedef struct
 {
     func_ptr ptr;
     thread_state state;
+    uint8_t max_call_level;
+    uint8_t current_call_level;
 } thread_context;
 
 
@@ -55,9 +57,12 @@ void load_context(uint8_t* ptr, const uint8_t size)
 {
     if(get_thread_state() == NOT_INIT)
         set_thread_state(RUNNING);
-    if( is_next_stack_frame_exist())
+    if( is_next_stack_frame_exist(size))
         load(ptr, size);
 }
+
+
+
 
 
 void create_thread(const func_ptr func)
@@ -66,6 +71,8 @@ void create_thread(const func_ptr func)
     {
         threads[pointer].ptr = func;
         threads[pointer].state = NOT_INIT;
+        threads[pointer].current_call_level = 0;
+        threads[pointer].max_call_level = 0;
         pointer++;
     }
 }

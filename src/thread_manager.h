@@ -14,13 +14,19 @@ typedef void(*func_ptr)();
 _thread_context.pc = 0;\
 load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 
-#define BEGIN_THREAD if(_thread_context.pc <= 0) {
+#define BEGIN_THREAD  switch(_thread_context.pc) { case 0:
 
 
-#define END_THREAD     set_end(true); pop(sizeof(_thread_context)); terminate_thread(); }
+#define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  }
 
 
-#define YIELD  _thread_context.pc = __LINE__;  save_context((uint8_t*)&_thread_context, sizeof(_thread_context));} else if( _thread_context.pc == __LINE__) {
+#define YIELD  case __LINE__: {_thread_context.pc = __LINE__ + 1;  \
+               reset(); \
+               if(!is_next_stack_frame_exist(sizeof(_thread_context))) pop(sizeof(_thread_context));\
+               save_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
+               break; \
+               }\
+               case __LINE__ + 1: \
 
 
 #ifdef __cplusplus
@@ -35,6 +41,9 @@ void thread_manager();
 void terminate_thread();
 bool is_end();
 void set_end(const bool val);
+void inc_call_level();
+void dec_call_level();
+void end_func();
 
 #ifdef __cplusplus
 }
