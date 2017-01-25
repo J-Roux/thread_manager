@@ -20,20 +20,14 @@ load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 #define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  }
 
 #define YIELD  case __LINE__: {  \
-yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __LINE__ + 1); \
+_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __LINE__ + 1); \
 break;  \
 }       \
 case __LINE__ + 1: \
 
 
 
-#define _YIELD  case __LINE__: {_thread_context.pc = __LINE__ + 1;  \
-               reset(); \
-               if(!is_next_stack_frame_exist(sizeof(_thread_context))) pop(sizeof(_thread_context));\
-               save_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
-               break; \
-               }\
-               case __LINE__ + 1: \
+
 
 #define CALL(CALLABLE_EXPR)         case  __LINE__: \
 if(THIS.pc > 0)                     \
@@ -61,7 +55,7 @@ case __LINE__ + 2:  \
 #ifdef __cplusplus
 extern "C" {
 #endif
-void yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line);
+void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line);
 uint8_t get_id();
 void create_thread(const func_ptr func);
 void load_context(uint8_t* ptr,const uint8_t size);

@@ -52,7 +52,7 @@ void save_context(const uint8_t* ptr, const uint8_t size)
     push(ptr, size);
 }
 
-void yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line)
+void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line)
 {
     if(*pc > 0)
         pop(size);
