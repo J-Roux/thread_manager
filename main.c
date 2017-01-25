@@ -4,14 +4,6 @@
 
 
 
-void yield(uint8_t* context, uint8_t size, uint8_t *pc, uint32_t line)
-{
-    if(*pc > 0)
-        pop(size);
-    *pc = line;
-    save_context(context, size);
-    reset();
-}
 
 
 

@@ -20,11 +20,7 @@ load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 #define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  }
 
 #define YIELD  case __LINE__: {  \
-if(THIS.pc > 0)     \
-    pop(sizeof(_thread_context));  \
-_thread_context.pc = __LINE__ + 1;             \
-save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); \
-reset(); \
+yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __LINE__ + 1); \
 break;  \
 }       \
 case __LINE__ + 1: \
@@ -65,7 +61,7 @@ case __LINE__ + 2:  \
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+void yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line);
 uint8_t get_id();
 void create_thread(const func_ptr func);
 void load_context(uint8_t* ptr,const uint8_t size);
