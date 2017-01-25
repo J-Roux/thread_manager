@@ -66,3 +66,7 @@ bool is_next_stack_frame_exist(const uint8_t size)
     return context_pointer[get_id()] + size <= pointer[get_id()];
 }
 
+bool is_this_frame(const uint8_t size)
+{
+    return context_pointer[get_id()] + size == pointer[get_id()];
+}

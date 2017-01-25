@@ -62,7 +62,10 @@ void load_context(uint8_t* ptr, const uint8_t size)
 }
 
 
-
+void clear_thread_table()
+{
+    pointer = 0;
+}
 
 
 void create_thread(const func_ptr func)
@@ -92,7 +95,7 @@ void set_end(const bool val)
 void thread_manager()
 {
     for (int i = 0; i < MAX_THREAD_COUNT; end[i]= false, i++);
-    for(int i = 0, j =0; j < 9; i = (++i % MAX_THREAD_COUNT), j++)
+    for(int i = 0, j =0; j < 40; i = (++i % MAX_THREAD_COUNT), j++)
     {
         current_id = i;
         if(threads[i].state != END)
