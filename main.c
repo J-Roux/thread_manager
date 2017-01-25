@@ -39,8 +39,7 @@ void f3()
     YIELD;
         printf("\n%u", THIS.b);
         set_end(true);
-        pop(sizeof(_thread_context)); // pop only if yield
-    }
+    END;
 }
 
 
@@ -68,8 +67,10 @@ void f2()
 
 int main()
 {
-    create_thread(&f1);
-    create_thread(&f2);
+    uint8_t stack_one[STACK_SIZE];
+    uint8_t stack_two[STACK_SIZE - 10];
+    create_thread(&f1, 0, stack_one, thread_priotity_idle);
+    create_thread(&f2, 0, stack_two, thread_priotity_idle);
     thread_manager();
     puts("\nend thread manager");
     return 0;

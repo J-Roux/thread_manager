@@ -4,7 +4,15 @@
 #include "stack.h"
 #include "thread_manager_config.h"
 #include <stdbool.h>
-typedef void(*func_ptr)();
+typedef void(*func_ptr)(uint8_t* argv);
+
+typedef enum
+{
+    thread_priotity_idle
+
+} thread_priority;
+
+
 
 #define THIS _thread_context
 #define DECLARE_AREA struct { \
@@ -16,6 +24,14 @@ load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 
 #define BEGIN_THREAD  switch(_thread_context.pc) { case 0:
 
+#define BEGIN  switch(_thread_context.pc) { case 0:
+
+
+#define END        set_end(true); \
+if(THIS.pc > 0)                     \
+    pop(sizeof(_thread_context)); \
+}   \
+  // TO DO : return val
 
 #define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  }
 
@@ -51,24 +67,19 @@ case __LINE__ + 2:  \
 
 
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line);
 uint8_t get_id();
-void create_thread(const func_ptr func);
+int create_thread(const func_ptr func, uint8_t* args,  uint8_t* stack_pointer, thread_priority priority);
 void load_context(uint8_t* ptr,const uint8_t size);
 void save_context(const uint8_t* ptr,const uint8_t size);
 void thread_manager();
 void terminate_thread();
 bool is_end();
 void set_end(const bool val);
-void inc_call_level();
-void dec_call_level();
-void end_func();
-bool is_this_frame(const uint8_t size);
-void clear_thread_table();
+
 
 #ifdef __cplusplus
 }

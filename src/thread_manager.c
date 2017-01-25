@@ -2,48 +2,40 @@
 
 typedef enum
 {
-    NOT_INIT,
-    RUNNING,
-    END
+    TERMINATE,
+    INIT,
+    RUNNING
 } thread_state;
+
 
 
 typedef struct
 {
-    func_ptr ptr;
-    thread_state state;
-    uint8_t max_call_level;
-    uint8_t current_call_level;
+    func_ptr            ptr;
+    thread_state        state;
+    uint8_t             *stack_pointer;
+    uint8_t             *args;
+    thread_priority     priority;
+    bool end_flag;
 } thread_context;
 
 
 
 
-static uint8_t pointer = 0;
 
-static thread_context threads[MAX_THREAD_COUNT];
-
-static uint8_t current_id;
+static thread_context   threads[MAX_THREAD_COUNT];
+static uint8_t          current_id;
+static uint8_t          thread_num                  = 0;
 
 void terminate_thread()
 {
-    threads[get_id()].state = END;
+    threads[get_id()].state = TERMINATE;
 }
 
 
 uint8_t get_id()
 {
     return current_id;
-}
-
-static thread_state get_thread_state()
-{
-    return threads[current_id].state;
-}
-
-static void set_thread_state(const thread_state state)
-{
-    threads[current_id].state = state;
 }
 
 
@@ -66,50 +58,73 @@ void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line)
 
 void load_context(uint8_t* ptr, const uint8_t size)
 {
-    if(get_thread_state() == NOT_INIT)
-        set_thread_state(RUNNING);
+    if(threads[current_id].state == INIT)
+        threads[current_id].state = RUNNING;
     if( is_next_stack_frame_exist(size))
         load(ptr, size);
 }
 
 
-void clear_thread_table()
-{
-    pointer = 0;
-}
 
 
-void create_thread(const func_ptr func)
+
+int create_thread(const func_ptr func,
+                  uint8_t *args,
+                  uint8_t *stack_pointer,
+                  thread_priority priority)
 {
-    if(pointer < MAX_THREAD_COUNT)
+    int errno;
+    for(uint8_t i = 0; i < MAX_THREAD_COUNT; i++)
     {
-        threads[pointer].ptr = func;
-        threads[pointer].state = NOT_INIT;
-        threads[pointer].current_call_level = 0;
-        threads[pointer].max_call_level = 0;
-        pointer++;
+        if(threads[i].ptr == 0)
+        {
+            threads[i].ptr            = func;
+            threads[i].state          = INIT;
+            threads[i].end_flag       = false;
+            threads[i].args           = args;
+            threads[i].stack_pointer  = stack_pointer; //TO DO: stack to id
+            threads[i].priority       = priority;
+            allocate_stack(stack_pointer, i);
+            errno                     = 0;
+            thread_num++;
+            break;
+        }
     }
+    return errno;
+
 }
 
-static bool end[MAX_THREAD_COUNT];
+
 
 bool is_end()
 {
-    return end[current_id];
+    return threads[current_id].end_flag;
 }
 
 void set_end(const bool val)
 {
-    end[current_id] = val;
+    threads[current_id].end_flag = val;
 }
 
 void thread_manager()
 {
-    for (int i = 0; i < MAX_THREAD_COUNT; end[i]= false, i++);
-    for(int i = 0, j =0; j < 40; i = (++i % MAX_THREAD_COUNT), j++)
+
+    init_stack();
+
+    for(int i = 0, j = 0; j< 50;  i = (++i % (thread_num ) ), j++)
     {
-        current_id = i;
-        if(threads[i].state != END)
-            threads[i].ptr();
+        if(threads[i].state != TERMINATE)
+        {
+            current_id = i;
+            threads[i].ptr(threads[i].args);
+        }
+        else
+        {
+            threads[i].ptr = 0;
+            //TO DO: mem delete
+        }
+
+
     }
+    thread_num = 0;
 }

@@ -1,9 +1,9 @@
 #include "stack.h"
 #include "thread_manager_config.h"
 #include <string.h>
-static uint8_t data[MAX_THREAD_COUNT][STACK_SIZE];
-static ptr_size pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
-static ptr_size context_pointer[MAX_THREAD_COUNT] = { STACK_START_ADDRESS, STACK_START_ADDRESS };
+static uint8_t *data[MAX_THREAD_COUNT];
+static ptr_size pointer[MAX_THREAD_COUNT];
+static ptr_size context_pointer[MAX_THREAD_COUNT];
 void reset() { context_pointer[get_id()] = STACK_START_ADDRESS; }
 
 typedef enum
@@ -66,7 +66,16 @@ bool is_next_stack_frame_exist(const uint8_t size)
     return context_pointer[get_id()] + size <= pointer[get_id()];
 }
 
-bool is_this_frame(const uint8_t size)
+void init_stack()
 {
-    return context_pointer[get_id()] + size == pointer[get_id()];
+    for(uint8_t i = 0; i < MAX_THREAD_COUNT; i++)
+    {
+        pointer[i] = STACK_START_ADDRESS;
+        context_pointer[i] = STACK_START_ADDRESS;
+    }
+}
+
+void allocate_stack(uint8_t * ptr, uint8_t stack_num)
+{
+    data[stack_num] = ptr;
 }

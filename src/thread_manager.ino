@@ -36,8 +36,10 @@ void f2()
 
 void setup()
 {
-    create_thread(&f1);
-    create_thread(&f2);
+    uint8_t stack_one[STACK_SIZE];
+    uint8_t stack_two[STACK_SIZE - 10];
+    create_thread(&f1, 0, stack_one, thread_priotity_idle);
+    create_thread(&f2, 0, stack_two, thread_priotity_idle);
     thread_manager();
     Serial.println("end kernel");
     return 0;

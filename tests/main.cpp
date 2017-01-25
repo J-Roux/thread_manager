@@ -13,7 +13,7 @@
 
 std::vector<std::string> message_queue;
 
-void f1()
+void f1(uint8_t * args)
 {
     DECLARE_AREA;
         uint8_t a;
@@ -27,7 +27,7 @@ void f1()
     END_THREAD;
 }
 
-void f2()
+void f2(uint8_t * args)
 {
     DECLARE_AREA;
         uint8_t a;
@@ -45,8 +45,10 @@ void f2()
 
 TEST(thread_manager, normal_workflow)
 {
-    create_thread(&f1);
-    create_thread(&f2);
+    uint8_t stack_one[STACK_SIZE];
+    uint8_t stack_two[STACK_SIZE];
+    create_thread(&f1, 0, stack_one, thread_priotity_idle);
+    create_thread(&f2, 0, stack_two, thread_priotity_idle);
     thread_manager();
     message_queue.push_back("end kernel");
     std::vector<std::string> expected_message_queue = {
@@ -58,10 +60,9 @@ TEST(thread_manager, normal_workflow)
     };
     EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
     message_queue.clear();
-    clear_thread_table();
 }
 
-void thread1()
+void thread1(uint8_t * args)
 {
     DECLARE_AREA;
         uint8_t a;
@@ -90,12 +91,10 @@ void nested_function()
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
     YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
-        set_end(true);
-        pop(sizeof(_thread_context)); // pop only if yield
-    }
+    END;
 }
 
-void thread2()
+void thread2(uint8_t * args)
 {
     DECLARE_AREA;
         uint8_t a;
@@ -118,8 +117,10 @@ void thread2()
 
 TEST(thread_manager, call_func_into_thread)
 {
-    create_thread(&thread1);
-    create_thread(&thread2);
+    uint8_t stack_one[STACK_SIZE];
+    uint8_t stack_two[STACK_SIZE];
+    create_thread(&thread1, 0, stack_one, thread_priotity_idle);
+    create_thread(&thread2, 0, stack_two, thread_priotity_idle);
     thread_manager();
     message_queue.push_back("end kernel");
     std::vector<std::string> expected_message_queue = {
@@ -135,7 +136,80 @@ TEST(thread_manager, call_func_into_thread)
     };
     EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
     message_queue.clear();
-    clear_thread_table();
 }
+
+
+uint8_t stack_one[STACK_SIZE];
+uint8_t stack_two[STACK_SIZE];
+uint8_t stack_three[STACK_SIZE];
+
+
+void thread_child(uint8_t * args)
+{
+  DECLARE_AREA;
+      uint8_t a;
+  END_DECLARE_AREA;
+  BEGIN_THREAD;
+      THIS.a = 3;
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  END_THREAD;
+}
+
+
+void thread_parent(uint8_t * args)
+{
+  DECLARE_AREA;
+          uint8_t a;
+  END_DECLARE_AREA;
+  BEGIN_THREAD
+      THIS.a = 2;
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+      create_thread(&thread_child, 0, stack_three, thread_priotity_idle);
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  YIELD;
+      message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
+  END_THREAD;
+}
+
+
+
+TEST(thread_manager, create_thread_into_thread)
+{
+  create_thread(&thread1, 0, stack_one, thread_priotity_idle);
+  create_thread(&thread_parent, 0, stack_two, thread_priotity_idle);
+  thread_manager();
+  message_queue.push_back("end kernel");
+  std::vector<std::string> expected_message_queue = {
+      "thread1 1",
+      "thread_parent 2",
+      "thread1 1",
+      "thread_parent 2",
+      "thread_child 3",
+      "thread1 1",
+      "thread_parent 2",
+      "thread_child 3",
+      "thread1 1",
+      "thread_parent 2",
+      "thread_child 3",
+      "thread_child 3",
+      "end kernel"
+  };
+  EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
+  message_queue.clear();
+}
+
+
+
 
 
