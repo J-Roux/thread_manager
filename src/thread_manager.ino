@@ -5,7 +5,7 @@
 
 
 
-void f1()
+void f1(uint8_t * arg)
 {
     DECLARE_AREA;
         uint8_t a;
@@ -20,7 +20,7 @@ void f1()
 }
 
 
-void f2()
+void f2(uint8_t * arg)
 {
     DECLARE_AREA;
         uint8_t a;

@@ -261,7 +261,7 @@ void f5(uint8_t * args)
   END_DECLARE_AREA;
   BEGIN_THREAD;
       THIS.a = 1;
-  for(THIS.i = 0; i < 4; i++)
+  for(THIS.i = 0; THIS.i < 4; THIS.i++)
   {
       YIELD;
       message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
@@ -277,7 +277,7 @@ void f6(uint8_t * args)
   END_DECLARE_AREA;
   BEGIN_THREAD;
       THIS.a = 2;
-  for(THIS.i = 0; i < 4; i++)
+  for(THIS.i = 0; THIS.i < 4; THIS.i++)
   {
       YIELD;
       message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
