@@ -12,7 +12,7 @@ typedef enum
 
 } thread_priority;
 
-
+static int __null__ = __COUNTER__;
 
 #define THIS _thread_context
 #define DECLARE_AREA struct { \
@@ -22,37 +22,39 @@ typedef enum
 _thread_context.pc = 0;\
 load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
 
-#define BEGIN_THREAD  switch(_thread_context.pc) { case 0:
+#define BEGIN_THREAD  switch(_thread_context.pc) { case 0:{}
 
-#define BEGIN  switch(_thread_context.pc) { case 0:
+#define BEGIN  switch(_thread_context.pc) { case 0:{}
 
 
 #define END        set_end(true); \
 if(THIS.pc > 0)                     \
     pop(sizeof(_thread_context)); \
 }   \
+end_function: \
   // TO DO : return val
 
-#define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  }
+#define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  } end_function: {}
 
-#define YIELD  case __LINE__: {  \
-_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __LINE__ + 1); \
-break;  \
-}       \
-case __LINE__ + 1: \
-
-
+#define YIELD  case __COUNTER__:   \
+_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __COUNTER__ + 1); \
+goto end_function;  \
+      \
+case __COUNTER__: {} \
 
 
 
-#define CALL(CALLABLE_EXPR)         case  __LINE__: \
+
+
+#define CALL(CALLABLE_EXPR)         case  __COUNTER__:{ \
 if(THIS.pc > 0)                     \
 { \
     pop(sizeof(_thread_context));   \
-    _thread_context.pc = __LINE__ + 1; \
+    _thread_context.pc = __COUNTER__ + 1; \
     save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); \
-}                                                                       \
-case __LINE__ + 1: CALLABLE_EXPR;     \
+} \
+} \
+case __COUNTER__:{} CALLABLE_EXPR;     \
 if(!is_end())     \
 {    \
     break; \
@@ -61,9 +63,9 @@ else        \
 {           \
     set_end(false); \
     load_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
-    THIS.pc = __LINE__ + 2; \
+    THIS.pc = __COUNTER__ + 1; \
 }   \
-case __LINE__ + 2:  \
+case __COUNTER__: {} \
 
 
 

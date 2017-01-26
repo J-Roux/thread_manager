@@ -84,8 +84,9 @@ int create_thread(const func_ptr func,
             threads[i].args           = args;
             threads[i].stack_pointer  = stack_pointer; //TO DO: stack to id
             threads[i].priority       = priority;
-            allocate_stack(stack_pointer, i);
             errno                     = 0;
+
+            allocate_stack(stack_pointer, i);
             thread_num++;
             break;
         }
