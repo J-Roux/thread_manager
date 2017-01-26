@@ -5,70 +5,41 @@
 
 
 
-void f1()
+void f1(uint8_t * arg)
 {
-    struct {
-        uint32_t pc;
+    DECLARE_AREA;
         uint8_t a;
-
-    } _thread_context;
-    _thread_context.pc = 0;
-    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
-    switch (_thread_context.pc)
-    {
-    case 0:
-    {
-        _thread_context.a = 7;
-    }
-    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
-
-        Serial.println(_thread_context.a);
-    }
-    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
-        Serial.println( _thread_context.a);
-    }
-    }
+    END_DECLARE_AREA;
+    BEGIN_THREAD;
+        THIS.a = 7;
+    YIELD;
+        Serial.println(THIS.a);
+    YIELD;
+        Serial.println(THIS.a);
+    END_THREAD;
 }
 
 
-void f2()
+void f2(uint8_t * arg)
 {
-    struct {
-        uint32_t pc;
+    DECLARE_AREA;
         uint8_t a;
-
-    } _thread_context;
-    _thread_context.pc = 0;
-    load_context((uint8_t*)&_thread_context, sizeof(_thread_context));
-    switch (_thread_context.pc)
-    {
-    case 0:
-    {
-        _thread_context.a = 5;
-
-    }
-    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
-        Serial.println( _thread_context.a);
-    }
-
-    case __LINE__: _thread_context.pc = __LINE__ + 1; save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); return;
-    case __LINE__:
-    {
-        Serial.println(_thread_context.a);
-    }
-    }
+    END_DECLARE_AREA;
+    BEGIN_THREAD;
+        THIS.a = 5;
+    YIELD;
+        Serial.println(THIS.a);
+    YIELD;
+        Serial.println(THIS.a);
+    END_THREAD;
 }
 
 void setup()
 {
-    create_thread(&f1);
-    create_thread(&f2);
+    uint8_t stack_one[STACK_SIZE];
+    uint8_t stack_two[STACK_SIZE - 10];
+    create_thread(&f1, 0, stack_one, thread_priotity_idle);
+    create_thread(&f2, 0, stack_two, thread_priotity_idle);
     thread_manager();
     Serial.println("end kernel");
     return 0;
