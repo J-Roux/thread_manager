@@ -12,6 +12,7 @@ typedef enum
 
 } thread_priority;
 
+
 static int __null__ = __COUNTER__;
 
 #define THIS _thread_context

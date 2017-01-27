@@ -37,7 +37,6 @@ RESULT push(const uint8_t *ptr, const ptr_size size)
     ++(pointer[get_id()]);
     memcpy(data[get_id()] + pointer[get_id()], ptr, size);
     pointer[get_id()] += size - 1;
-
   }
   return result;
 }

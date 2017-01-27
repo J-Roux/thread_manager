@@ -7,16 +7,20 @@ typedef enum
     RUNNING
 } thread_state;
 
-
+typedef struct
+{
+    uint8_t             state       : 3;
+    uint8_t             priority    : 4;
+    bool                end_flag    : 1;
+    uint8_t             errno          ;
+}   thread_info;
 
 typedef struct
 {
     func_ptr            ptr;
-    thread_state        state;
     uint8_t             *stack_pointer;
     uint8_t             *args;
-    thread_priority     priority;
-    bool end_flag;
+    thread_info         info;
 } thread_context;
 
 
@@ -29,7 +33,7 @@ static uint8_t          thread_num                  = 0;
 
 void terminate_thread()
 {
-    threads[get_id()].state = TERMINATE;
+    threads[get_id()].info.state = TERMINATE;
 }
 
 
@@ -58,8 +62,8 @@ void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line)
 
 void load_context(uint8_t* ptr, const uint8_t size)
 {
-    if(threads[current_id].state == INIT)
-        threads[current_id].state = RUNNING;
+    if(threads[current_id].info.state == INIT)
+        threads[current_id].info.state = RUNNING;
     if( is_next_stack_frame_exist(size))
         load(ptr, size);
 }
@@ -78,14 +82,13 @@ int create_thread(const func_ptr func,
     {
         if(threads[i].ptr == 0)
         {
-            threads[i].ptr            = func;
-            threads[i].state          = INIT;
-            threads[i].end_flag       = false;
-            threads[i].args           = args;
-            threads[i].stack_pointer  = stack_pointer; //TO DO: stack to id
-            threads[i].priority       = priority;
-            errno                     = 0;
-
+            threads[i].info.priority       = priority;
+            threads[i].info.state          = INIT;
+            threads[i].info.end_flag       = false;
+            threads[i].ptr                 = func;
+            threads[i].args                = args;
+            threads[i].stack_pointer       = stack_pointer; //TO DO: stack to id
+            errno                          = 0;
             allocate_stack(stack_pointer, i);
             thread_num++;
             break;
@@ -99,12 +102,12 @@ int create_thread(const func_ptr func,
 
 bool is_end()
 {
-    return threads[current_id].end_flag;
+    return threads[current_id].info.end_flag;
 }
 
 void set_end(const bool val)
 {
-    threads[current_id].end_flag = val;
+    threads[current_id].info.end_flag = val;
 }
 
 void thread_manager()
@@ -114,7 +117,7 @@ void thread_manager()
 
     for(int i = 0, j = 0; j< 50;  i = (++i % (thread_num ) ), j++)
     {
-        if(threads[i].state != TERMINATE)
+        if(threads[i].info.state != TERMINATE)
         {
             current_id = i;
             threads[i].ptr(threads[i].args);
