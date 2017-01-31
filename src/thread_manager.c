@@ -112,10 +112,9 @@ void set_end(const bool val)
 
 void thread_manager()
 {
-
     init_stack();
-
-    for(int i = 0, j = 0; j< 50;  i = (++i % (thread_num ) ), j++)
+    uint8_t dead_thread = 0;
+    for(int i = 0; ;i = (++i % (thread_num ) ))
     {
         if(threads[i].info.state != TERMINATE)
         {
@@ -125,10 +124,14 @@ void thread_manager()
         else
         {
             threads[i].ptr = 0;
-            //TO DO: mem delete
+            dead_thread++;
         }
-
-
+        if(dead_thread == thread_num + 1)
+        {
+          break;
+        }
+        if(i == thread_num)
+          dead_thread = 0;
     }
     thread_num = 0;
 }

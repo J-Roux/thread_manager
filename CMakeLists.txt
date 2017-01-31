@@ -24,7 +24,7 @@ if (test)
 
  include_directories(${EXTERNAL_INSTALL_LOCATION}/include)
  link_directories(${EXTERNAL_INSTALL_LOCATION}/lib)
- set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y")
+ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -fprofile-arcs -ftest-coverage")
  enable_testing()
 
  file(GLOB TESTS "${CMAKE_SOURCE_DIR}/tests/main.cpp")
