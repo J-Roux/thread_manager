@@ -80,6 +80,7 @@ void load_context(uint8_t* ptr,const uint8_t size);
 void save_context(const uint8_t* ptr,const uint8_t size);
 void thread_manager();
 void terminate_thread();
+void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec);
 bool is_end();
 void set_end(const bool val);
 

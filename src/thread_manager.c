@@ -1,5 +1,5 @@
 #include "thread_manager.h"
-
+#include "time.h"
 typedef enum
 {
     TERMINATE,
@@ -9,10 +9,19 @@ typedef enum
 
 typedef struct
 {
+    uint16_t sec        : 10;
+    uint16_t usec       : 10;
+    uint16_t micro_sec  : 10;
+} time_interval;
+
+typedef struct
+{
     uint8_t             state       : 3;
     uint8_t             priority    : 4;
     bool                end_flag    : 1;
     uint8_t             errno          ;
+    clock_t             start_time     ;
+    time_interval       interval       ;
 }   thread_info;
 
 typedef struct
@@ -26,7 +35,6 @@ typedef struct
 
 
 
-
 static thread_context   threads[MAX_THREAD_COUNT];
 static uint8_t          current_id;
 static uint8_t          thread_num                  = 0;
@@ -34,6 +42,15 @@ static uint8_t          thread_num                  = 0;
 void terminate_thread()
 {
     threads[get_id()].info.state = TERMINATE;
+}
+
+
+void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec)
+{
+    threads[get_id()].info.interval.sec       = sec;
+    threads[get_id()].info.interval.usec      = usec;
+    threads[get_id()].info.interval.micro_sec = micro_sec;
+    threads[get_id()].info.start_time = clock();
 }
 
 
@@ -82,13 +99,17 @@ int create_thread(const func_ptr func,
     {
         if(threads[i].ptr == 0)
         {
-            threads[i].info.priority       = priority;
-            threads[i].info.state          = INIT;
-            threads[i].info.end_flag       = false;
-            threads[i].ptr                 = func;
-            threads[i].args                = args;
-            threads[i].stack_pointer       = stack_pointer; //TO DO: stack to id
-            errno                          = 0;
+            threads[i].info.priority           = priority;
+            threads[i].info.state              = INIT;
+            threads[i].info.end_flag           = false;
+            threads[i].info.start_time         = 0;
+            threads[i].info.interval.sec       = 0;
+            threads[i].info.interval.usec      = 0;
+            threads[i].info.interval.micro_sec = 0;
+            threads[i].ptr                     = func;
+            threads[i].args                    = args;
+            threads[i].stack_pointer           = stack_pointer;
+            errno                              = 0;
             allocate_stack(stack_pointer, i);
             thread_num++;
             break;
@@ -118,6 +139,7 @@ void thread_manager()
     {
         if(threads[i].info.state != TERMINATE)
         {
+
             current_id = i;
             threads[i].ptr(threads[i].args);
         }
