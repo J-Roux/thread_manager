@@ -21,7 +21,7 @@ extern "C" {
 
 RESULT load(uint8_t* ptr, const ptr_size size);
 RESULT push(const uint8_t *ptr, const ptr_size size);
-RESULT pop(const ptr_size size);
+void pop(const ptr_size size);
 void reset();
 bool is_next_stack_frame_exist(const uint8_t size);
 void init_stack();

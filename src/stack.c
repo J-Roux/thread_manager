@@ -42,10 +42,9 @@ RESULT push(const uint8_t *ptr, const ptr_size size)
 }
 
 
-RESULT pop(const ptr_size size)
+void pop(const ptr_size size)
 {
-        pointer[get_id()] -= size - 1;
-        (pointer[get_id()])--;
+        pointer[get_id()] -= size;
 }
 
 RESULT load(uint8_t* ptr, const ptr_size size)

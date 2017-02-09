@@ -37,7 +37,6 @@ void setup()
     create_thread(&f1, 0, stack_one, thread_priotity_idle);
     create_thread(&f2, 0, stack_two, thread_priotity_idle);
     thread_manager();
-    return 0;
 }
 
 void loop()

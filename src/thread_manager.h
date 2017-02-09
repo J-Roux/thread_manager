@@ -13,7 +13,7 @@ typedef enum
 } thread_priority;
 
 
-static int __null__ = __COUNTER__;
+
 
 #define THIS _thread_context
 #define DECLARE_AREA struct { \
@@ -37,11 +37,11 @@ end_function: \
 
 #define END_THREAD   set_end(true); pop(sizeof(_thread_context)); terminate_thread();  } end_function: {}
 
-#define YIELD  case __COUNTER__:   \
-_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __COUNTER__ + 1); \
+#define YIELD  case __COUNTER__ + 1:   \
+_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc), __COUNTER__ + 2); \
 goto end_function;  \
       \
-case __COUNTER__: {} \
+case __COUNTER__ + 1: {} \
 
 
 
@@ -49,7 +49,7 @@ case __COUNTER__: {} \
 
 
 
-#define CALL(CALLABLE_EXPR)         case  __COUNTER__:{ \
+#define CALL(CALLABLE_EXPR)         case  __COUNTER__ + 1:{ \
 if(THIS.pc > 0)                     \
 { \
     pop(sizeof(_thread_context));   \
@@ -57,7 +57,7 @@ if(THIS.pc > 0)                     \
     save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); \
 } \
 } \
-case __COUNTER__:{} CALLABLE_EXPR;     \
+case __COUNTER__ :{} CALLABLE_EXPR;     \
 if(!is_end())     \
 {    \
     break; \
@@ -66,9 +66,9 @@ else        \
 {           \
     set_end(false); \
     load_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
-    THIS.pc = __COUNTER__ + 1; \
+    THIS.pc = __COUNTER__ + 2; \
 }   \
-case __COUNTER__: {} \
+case __COUNTER__ + 1: {} \
 
 
 
@@ -76,7 +76,7 @@ case __COUNTER__: {} \
 extern "C" {
 #endif
 void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line);
-uint8_t get_id();
+const uint8_t get_id();
 int create_thread(const func_ptr func, uint8_t* args,  uint8_t* stack_pointer, thread_priority priority);
 void load_context(uint8_t* ptr,const uint8_t size);
 void save_context(const uint8_t* ptr,const uint8_t size);

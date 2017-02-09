@@ -12,6 +12,7 @@
 #endif
 
 
+
 typedef enum
 {
         TERMINATE,
@@ -67,16 +68,15 @@ void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec)
 {
         if(threads[get_id()].info.state != WAIT)
         {
-                threads[get_id()].info.interval.sec       = sec;
-                threads[get_id()].info.interval.usec      = usec;
-                threads[get_id()].info.interval.micro_sec = micro_sec;
+                time_interval interval = { sec, usec, micro_sec };
+                threads[get_id()].info.interval           = interval;
                 threads[get_id()].info.start_time         = clock();
                 threads[get_id()].info.state              = WAIT;
         }
 }
 
 
-uint8_t get_id()
+const uint8_t get_id()
 {
         return current_id;
 }
@@ -121,13 +121,12 @@ int create_thread(const func_ptr func,
         {
                 if(threads[i].ptr == 0)
                 {
+                        time_interval zero = {0};
                         threads[i].info.priority           = priority;
                         threads[i].info.state              = INIT;
                         threads[i].info.end_flag           = false;
                         threads[i].info.start_time         = 0;
-                        threads[i].info.interval.sec       = 0;
-                        threads[i].info.interval.usec      = 0;
-                        threads[i].info.interval.micro_sec = 0;
+                        threads[i].info.interval           = zero;
                         threads[i].ptr                     = func;
                         threads[i].args                    = args;
                         threads[i].stack_pointer           = stack_pointer;
@@ -157,10 +156,6 @@ bool greater_interval(const time_interval* t1, const time_interval* t2)
         bool result = false;
         if(t1->sec >= t2->sec && t1->usec >= t2->usec && t1->micro_sec >= t2->micro_sec)
                 result = true;
-//        if(t1->usec > t2->usec)
-//                result = true;
-//        if(t1->micro_sec >= t2->micro_sec)
-//                result = true;
         return result;
 }
 
@@ -184,7 +179,7 @@ void thread_manager()
 {
         init_stack();
         uint8_t dead_thread = 0;
-        for(int i = 0; ;i = (++i % (thread_num ) ))
+        for(int i = 0; ; )
         {
 
                 switch(threads[i].info.state)
@@ -195,11 +190,10 @@ void thread_manager()
                                 time_interval interval = get_time_interval(&(threads[i].info.start_time), &end);
                                 if(greater_interval(&interval, &(threads[i].info.interval)))
                                 {
-                                        threads[i].info.state = RUNNING;
-                                        threads[i].info.start_time = 0;
-                                        threads[i].info.interval.sec = 0;
-                                        threads[i].info.interval.usec = 0;
-                                        threads[i].info.interval.micro_sec = 0;
+                                        time_interval zero                 = {0};
+                                        threads[i].info.state              = RUNNING;
+                                        threads[i].info.start_time         = 0;
+                                        threads[i].info.interval           = zero;
                                 }
                                 else
                                         break;
@@ -226,6 +220,8 @@ void thread_manager()
                 }
                 if(i == thread_num - 1)
                         dead_thread = 0;
+                i++;
+                i = ( i % (thread_num ));
         }
         thread_num = 0;
 }
