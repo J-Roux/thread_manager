@@ -3,7 +3,7 @@
 #ifndef ARDUINO
         #include <time.h>
 #else
-        typedef clock_t uint64_t;
+        typedef uint64_t clock_t;
         #define CLOCKS_PER_SEC (clock_t)1000000
         clock_t clock()
         {
