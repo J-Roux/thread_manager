@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <time.h>
 
 
 
@@ -308,4 +309,79 @@ TEST(thread_manager, for_statement)
     EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
     message_queue.clear();
 }
+
+
+
+
+
+void Wait(double delta)
+{
+        clock_t expire = clock() + delta * CLOCKS_PER_SEC;
+        while (clock() < expire) {
+        }
+}
+
+
+
+
+void wait_thread(uint8_t * args)
+{
+        DECLARE_AREA;
+        uint8_t a;
+        uint8_t i;
+        END_DECLARE_AREA;
+        BEGIN_THREAD;
+        for( THIS.i = 0; THIS.i < 3; THIS.i++)
+        {
+                message_queue.push_back(std::string(__FUNCTION__) );
+                WAIT_FOR(0, 1, 0);
+        }
+        END_THREAD;
+}
+
+
+
+void sleep_thread(uint8_t * args)
+{
+        DECLARE_AREA;
+        uint8_t a;
+        uint8_t i;
+        END_DECLARE_AREA;
+        BEGIN_THREAD;
+        for(THIS.i = 0; THIS.i < 6; THIS.i++)
+        {
+                message_queue.push_back(std::string(__FUNCTION__) );
+                Wait(0.0005);
+                YIELD;
+        }
+        END_THREAD;
+}
+
+
+
+
+TEST(thread_manager, wait)
+{
+        uint8_t stack_one[STACK_SIZE];
+        uint8_t stack_two[STACK_SIZE - 10];
+        create_thread(&wait_thread, 0, stack_one, thread_priotity_idle);
+        create_thread(&sleep_thread, 0, stack_two, thread_priotity_idle);
+        thread_manager();
+        message_queue.push_back("end kernel");
+        std::vector<std::string> expected_message_queue = {
+            "wait_thread",
+            "sleep_thread",
+            "sleep_thread",
+            "wait_thread",
+            "sleep_thread",
+            "sleep_thread",
+            "wait_thread",
+            "sleep_thread",
+            "sleep_thread",
+            "end kernel"
+        };
+        EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
+        message_queue.clear();
+}
+
 

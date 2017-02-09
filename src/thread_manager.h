@@ -45,6 +45,8 @@ case __COUNTER__: {} \
 
 
 
+#define WAIT_FOR(SEC, USEC, MICRO_SEC) start_timer(SEC, USEC, MICRO_SEC); YIELD;
+
 
 
 #define CALL(CALLABLE_EXPR)         case  __COUNTER__:{ \
