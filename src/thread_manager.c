@@ -132,7 +132,8 @@ int create_thread(const func_ptr func,
                         threads[i].stack_pointer           = stack_pointer;
                         errno                              = 0;
                         allocate_stack(stack_pointer, i);
-                        thread_num++;
+                        if(thread_num != MAX_THREAD_COUNT)
+                                thread_num++;
                         break;
                 }
         }
@@ -179,6 +180,7 @@ void thread_manager()
 {
         init_stack();
         uint8_t dead_thread = 0;
+        uint8_t actual_thread = thread_num;
         for(int i = 0; ; )
         {
 
@@ -216,6 +218,7 @@ void thread_manager()
 
                 if(dead_thread == thread_num )
                 {
+                        thread_num = 0;
                         break;
                 }
                 if(i == thread_num - 1)
