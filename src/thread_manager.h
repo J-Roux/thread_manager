@@ -65,7 +65,7 @@ void set_end(const bool val);
 
 
 #define END               set_end(true); \
-                          if(THIS.pc > 0)\
+                          if(THIS.pc != 0)\
                                pop(sizeof(_thread_context)); \
                           }   \
                           end_function: \
