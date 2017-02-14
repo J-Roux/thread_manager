@@ -15,31 +15,36 @@ typedef enum
 } thread_priority;
 
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
-void _yield(uint8_t* context, uint8_t size, int32_t* pc, int32_t line);
+void tm_yield(uint8_t* context, uint8_t size, int32_t* pc, int32_t line);
 
-const uint8_t get_id();
+const uint8_t tm_get_id();
 
-int create_thread(const func_ptr func, uint8_t* args,  uint8_t* stack_pointer, thread_priority priority);
+int8_t tm_create_thread(const func_ptr func, uint8_t* args,  uint8_t* stack_pointer, thread_priority priority);
 
-void load_context(uint8_t* ptr,const uint8_t size);
+void tm_load_context(uint8_t* ptr,const uint8_t size);
 
-void save_context(const uint8_t* ptr,const uint8_t size);
+void tm_save_context(const uint8_t* ptr,const uint8_t size);
 
-void thread_manager();
+void tm_thread_manager();
 
-void terminate_thread();
+void tm_terminate_thread(uint32_t size);
 
-void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec);
+void tm_start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec);
 
-bool is_end();
+const bool tm_is_exception_thrown();
 
-void set_end(const bool val);
+bool tm_is_end();
 
+void tm_set_end(const bool val);
+
+void tm_save_state(uint8_t* context, uint16_t size);
 
 #ifdef __cplusplus
 }
@@ -57,33 +62,33 @@ void set_end(const bool val);
 
 #define END_DECLARE_AREA  } _thread_context;\
                           _thread_context.pc = 0;\
-                          load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
+                          tm_load_context((uint8_t*)&_thread_context, sizeof(_thread_context));\
+//                          if(is_exception_thrown()) \
+//                                goto end_function; \
 
 #define BEGIN_THREAD      switch( _thread_context.pc) { case 0:{}
 
 #define BEGIN             switch( _thread_context.pc) { case 0:{}
 
 
-#define END               set_end(true); \
+#define END               tm_set_end(true); \
                           if(THIS.pc != 0)\
                                pop(sizeof(_thread_context)); \
                           }   \
-                          end_function: \
+                          end_function:{}\
 
-#define END_THREAD        set_end(true);\
-                          pop(sizeof(_thread_context));\
-                          terminate_thread();\
+#define END_THREAD        tm_terminate_thread(sizeof(_thread_context));\
                           } end_function: {} \
 
 #define YIELD             case __LINE__:   \
-                          _yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc),  -__LINE__); \
+                          tm_yield((uint8_t*)&_thread_context, sizeof(_thread_context), &(_thread_context.pc),  -__LINE__); \
                           goto end_function;  \
                                 \
                           case -__LINE__: {} \
 
 
 
-#define WAIT_FOR(SEC, USEC, MICRO_SEC) start_timer(SEC, USEC, MICRO_SEC); YIELD;
+#define WAIT_FOR(SEC, USEC, MICRO_SEC) tm_start_timer(SEC, USEC, MICRO_SEC); YIELD;
 
 
 
@@ -91,20 +96,19 @@ void set_end(const bool val);
                                     { \
                                         if(THIS.pc != 0)                     \
                                         { \
-                                                pop(sizeof(_thread_context));   \
-                                                _thread_context.pc = -__LINE__; \
-                                                save_context((uint8_t*)&_thread_context, sizeof(_thread_context)); \
+                                                _thread_context.pc = - __LINE__; \
+                                                tm_save_state((uint8_t*)&_thread_context, sizeof(_thread_context));\
                                         } \
                                     } \
                                     case -__LINE__ :{} CALLABLE_EXPR;     \
-                                    if(!is_end())     \
+                                    if(!tm_is_end())     \
                                     {    \
                                         break; \
                                     }           \
                                     else        \
                                     {           \
-                                        set_end(false); \
-                                        load_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
+                                        tm_set_end(false); \
+                                        tm_load_context((uint8_t*)&_thread_context, sizeof(_thread_context));  \
                                         THIS.pc = __LINE__ + 1; \
                                     }   \
                                     case __LINE__ + 1: {} \

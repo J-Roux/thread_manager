@@ -5,6 +5,8 @@
 typedef enum
 {
         TERMINATE,
+        EXCEPTION,
+        RETURN_VALUE,
         INIT,
         WAIT,
         RUNNING
@@ -39,50 +41,52 @@ static thread_context   threads[MAX_THREAD_COUNT];
 static uint8_t          current_id;
 static uint8_t          thread_num                  = 0;
 
-void terminate_thread()
+void tm_terminate_thread(uint32_t size)
 {
-        threads[get_id()].info.state = TERMINATE;
+        pop(size);
+        tm_set_end(true);
+        threads[current_id].info.state = TERMINATE;
 }
 
 
 
 
-void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec)
+void tm_start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec)
 {
-        if(threads[get_id()].info.state != WAIT)
+        if(threads[current_id].info.state != WAIT)
         {
                 time_interval interval = { sec, usec, micro_sec };
-                threads[get_id()].info.interval           = interval;
-                threads[get_id()].info.start_time         = clock();
-                threads[get_id()].info.state              = WAIT;
+                threads[current_id].info.interval           = interval;
+                threads[current_id].info.start_time         = clock();
+                threads[current_id].info.state              = WAIT;
         }
 }
 
 
-const uint8_t get_id()
+const uint8_t tm_get_id()
 {
         return current_id;
 }
 
 
-void save_context(const uint8_t* ptr, const uint8_t size)
+void tm_save_context(const uint8_t* ptr, const uint8_t size)
 {
         push(ptr, size);
 }
 
-void _yield(uint8_t* context, uint8_t size, int32_t *pc, int32_t line)
+void tm_yield(uint8_t* context, uint8_t size, int32_t *pc, int32_t line)
 {
         if(*pc != 0)
                pop(size);
         *pc = line;
-        save_context(context, size);
+        tm_save_context(context, size);
         reset();
 }
 
 
 
 
-void load_context(uint8_t* ptr, const uint8_t size)
+void tm_load_context(uint8_t* ptr, const uint8_t size)
 {
         if(threads[current_id].info.state == INIT)
                 threads[current_id].info.state = RUNNING;
@@ -95,12 +99,12 @@ void load_context(uint8_t* ptr, const uint8_t size)
 
 
 
-int create_thread(const func_ptr func,
+int8_t tm_create_thread(const func_ptr func,
                   uint8_t *args,
                   uint8_t *stack_pointer,
                   thread_priority priority)
 {
-        int errno;
+        uint8_t id = -1;
         for(uint8_t i = 0; i < MAX_THREAD_COUNT; i++)
         {
                 if(threads[i].ptr == 0)
@@ -114,15 +118,14 @@ int create_thread(const func_ptr func,
                         threads[i].ptr                     = func;
                         threads[i].args                    = args;
                         threads[i].stack_pointer           = stack_pointer;
-                        errno                              = 0;
+                        id                                 = i;
                         allocate_stack(stack_pointer, i);
                         if(thread_num != MAX_THREAD_COUNT)
                                 thread_num++;
                         break;
                 }
         }
-        return errno;
-
+        return id;
 }
 
 
@@ -130,21 +133,24 @@ int create_thread(const func_ptr func,
 
 
 
-bool is_end()
+bool tm_is_end()
 {
         return threads[current_id].info.end_flag;
 }
 
-void set_end(const bool val)
+void tm_set_end(const bool val)
 {
         threads[current_id].info.end_flag = val;
 }
 
 
+const bool tm_is_exception_thrown()
+{
+        return threads[current_id].info.errno;
+}
 
 
-
-void thread_manager()
+void tm_thread_manager()
 {
         init_stack();
         uint8_t dead_thread = 0;
@@ -194,4 +200,10 @@ void thread_manager()
                 i = ( i % (thread_num ));
         }
         thread_num = 0;
+}
+
+void tm_save_state(uint8_t* context, uint16_t size)
+{
+        pop(size);
+        tm_save_context(context, size);
 }

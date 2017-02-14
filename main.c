@@ -62,9 +62,9 @@ int main()
 
         uint8_t stack_one[STACK_SIZE];
         uint8_t stack_two[STACK_SIZE - 10];
-        create_thread(&f1, 0, stack_one, thread_priotity_idle);
-        create_thread(&f2, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&f1, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&f2, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         puts("\nend thread manager");
 
 

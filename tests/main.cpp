@@ -44,13 +44,13 @@ void f2(uint8_t * args)
 
 
 
-TEST(thread_manager, normal_workflow)
+TEST(tm_thread_manager, normal_workflow)
 {
         uint8_t stack_one[STACK_SIZE];
         uint8_t stack_two[STACK_SIZE];
-        create_thread(&f1, 0, stack_one, thread_priotity_idle);
-        create_thread(&f2, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&f1, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&f2, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "f1 7",
@@ -112,13 +112,13 @@ void thread2(uint8_t * args)
 }
 
 
-TEST(thread_manager, call_func_into_thread)
+TEST(tm_thread_manager, call_func_into_thread)
 {
         uint8_t stack_one[STACK_SIZE];
         uint8_t stack_two[STACK_SIZE];
-        create_thread(&thread1, 0, stack_one, thread_priotity_idle);
-        create_thread(&thread2, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&thread1, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&thread2, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "thread1 1",
@@ -169,7 +169,7 @@ void thread_parent(uint8_t * args)
                         THIS.a = 2;
         YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
-        create_thread(&thread_child, 0, stack_three, thread_priotity_idle);
+        tm_create_thread(&thread_child, 0, stack_three, thread_priotity_idle);
         YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
         YIELD;
@@ -181,11 +181,11 @@ void thread_parent(uint8_t * args)
 
 
 
-TEST(thread_manager, create_thread_into_thread)
+TEST(tm_thread_manager, create_thread_into_thread)
 {
-        create_thread(&thread1, 0, stack_one, thread_priotity_idle);
-        create_thread(&thread_parent, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&thread1, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&thread_parent, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "thread1 1",
@@ -238,11 +238,11 @@ void f4(uint8_t * args)
         END_THREAD;
 }
 
-TEST(thread_manager, if_statement)
+TEST(tm_thread_manager, if_statement)
 {
-        create_thread(&f3, 0, stack_one, thread_priotity_idle);
-        create_thread(&f4, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&f3, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&f4, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "f3 7",
@@ -289,11 +289,11 @@ void f6(uint8_t * args)
 
 
 
-TEST(thread_manager, for_statement)
+TEST(tm_thread_manager, for_statement)
 {
-        create_thread(&f5, 0, stack_one, thread_priotity_idle);
-        create_thread(&f6, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&f5, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&f6, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "f5 1",
@@ -360,13 +360,13 @@ void sleep_thread(uint8_t * args)
 
 
 
-TEST(thread_manager, wait)
+TEST(tm_thread_manager, wait)
 {
         uint8_t stack_one[STACK_SIZE];
         uint8_t stack_two[STACK_SIZE - 10];
-        create_thread(&wait_thread, 0, stack_one, thread_priotity_idle);
-        create_thread(&sleep_thread, 0, stack_two, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&wait_thread, 0, stack_one, thread_priotity_idle);
+        tm_create_thread(&sleep_thread, 0, stack_two, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "wait_thread",
@@ -414,7 +414,7 @@ void f20(uint8_t * ptr)
         THIS.cnt = 0;
         for(THIS.i = 0; THIS.i < 5; THIS.i++)
         {
-                create_thread(&f10, 0, stack_two, thread_priotity_idle);
+                tm_create_thread(&f10, 0, stack_two, thread_priotity_idle);
                 message_queue.push_back(std::string(__FUNCTION__) );
                 WAIT_FOR(1, 0, 0);
         }
@@ -422,12 +422,12 @@ void f20(uint8_t * ptr)
 }
 
 
-TEST(thread_manager, korevko)
+TEST(tm_thread_manager, korevko)
 {
         uint8_t stack_one[STACK_SIZE];
 
-        create_thread(&f20, 0, stack_one, thread_priotity_idle);
-        thread_manager();
+        tm_create_thread(&f20, 0, stack_one, thread_priotity_idle);
+        tm_thread_manager();
         message_queue.push_back("end kernel");
         std::vector<std::string> expected_message_queue = {
                 "f20",
