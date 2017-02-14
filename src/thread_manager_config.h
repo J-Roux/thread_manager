@@ -3,5 +3,6 @@
 
 #define MAX_THREAD_COUNT 3
 
+typedef int16_t ptr_size;
 
 #endif

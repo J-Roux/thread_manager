@@ -1,16 +1,5 @@
 #include "thread_manager.h"
-
-#ifndef ARDUINO
-        #include <time.h>
-#else
-        typedef uint64_t clock_t;
-        #define CLOCKS_PER_SEC (clock_t)1000000
-        clock_t clock()
-        {
-                return 0;
-        }
-#endif
-
+#include "clock.h"
 
 
 typedef enum
@@ -22,14 +11,6 @@ typedef enum
 } thread_state;
 
 
-#pragma pack(2)
-typedef struct
-{
-        uint16_t sec        : 10;
-        uint16_t usec       : 10;
-        uint16_t micro_sec  : 10;
-} time_interval;
-#pragma pack()
 
 
 
@@ -64,6 +45,8 @@ void terminate_thread()
 }
 
 
+
+
 void start_timer(uint16_t sec, uint16_t usec, uint16_t micro_sec)
 {
         if(threads[get_id()].info.state != WAIT)
@@ -87,10 +70,10 @@ void save_context(const uint8_t* ptr, const uint8_t size)
         push(ptr, size);
 }
 
-void _yield(uint8_t* context, uint8_t size, uint32_t *pc, uint32_t line)
+void _yield(uint8_t* context, uint8_t size, int32_t *pc, int32_t line)
 {
-        if(*pc > 0)
-                pop(size);
+        if(*pc != 0)
+               pop(size);
         *pc = line;
         save_context(context, size);
         reset();
@@ -104,7 +87,8 @@ void load_context(uint8_t* ptr, const uint8_t size)
         if(threads[current_id].info.state == INIT)
                 threads[current_id].info.state = RUNNING;
         if( is_next_stack_frame_exist(size))
-                load(ptr, size);
+                if(load(ptr, size) == STACK_OVERFLOW)
+                        threads[current_id].info.errno = STACK_OVERFLOW;
 }
 
 
@@ -142,23 +126,7 @@ int create_thread(const func_ptr func,
 }
 
 
-time_interval get_time_interval(const clock_t* start, const clock_t* end)
-{
-        time_interval interval;
-        double dur         = 1000.0 * ( *end - *start) / CLOCKS_PER_SEC;
-        interval.sec       = dur / 1000;
-        interval.usec      = (long)dur % 1000;
-        interval.micro_sec = (dur - (long)(dur)) * 1000;
-        return interval;
-}
 
-bool greater_interval(const time_interval* t1, const time_interval* t2)
-{
-        bool result = false;
-        if(t1->sec >= t2->sec && t1->usec >= t2->usec && t1->micro_sec >= t2->micro_sec)
-                result = true;
-        return result;
-}
 
 
 
@@ -180,7 +148,6 @@ void thread_manager()
 {
         init_stack();
         uint8_t dead_thread = 0;
-        uint8_t actual_thread = thread_num;
         for(int i = 0; ; )
         {
 

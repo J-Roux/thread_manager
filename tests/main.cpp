@@ -87,7 +87,7 @@ void nested_function()
         uint8_t a;
         END_DECLARE_AREA;
         BEGIN_THREAD
-                        THIS.a = 3;
+        THIS.a = 3;
         YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
         YIELD;
@@ -104,36 +104,36 @@ void thread2(uint8_t * args)
         THIS.a = 2;
         YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
-        CALL( nested_function() );
+        CALL( nested_function());
+
         YIELD;
         message_queue.push_back(std::string(__FUNCTION__) + std::string(" ")+ std::to_string(THIS.a) );
-
         END_THREAD;
 }
 
 
-TEST(thread_manager, call_func_into_thread)
-{
-        uint8_t stack_one[STACK_SIZE];
-        uint8_t stack_two[STACK_SIZE];
-        create_thread(&thread1, 0, stack_one, thread_priotity_idle);
-        create_thread(&thread2, 0, stack_two, thread_priotity_idle);
-        thread_manager();
-        message_queue.push_back("end kernel");
-        std::vector<std::string> expected_message_queue = {
-                "thread1 1",
-                "thread2 2",
-                "thread1 1",
-                "nested_function 3",
-                "thread1 1",
-                "nested_function 3",
-                "thread1 1",
-                "thread2 2",
-                "end kernel"
-        };
-        EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
-        message_queue.clear();
-}
+//TEST(thread_manager, call_func_into_thread)
+//{
+//        uint8_t stack_one[STACK_SIZE];
+//        uint8_t stack_two[STACK_SIZE];
+//        create_thread(&thread1, 0, stack_one, thread_priotity_idle);
+//        create_thread(&thread2, 0, stack_two, thread_priotity_idle);
+//        thread_manager();
+//        message_queue.push_back("end kernel");
+//        std::vector<std::string> expected_message_queue = {
+//                "thread1 1",
+//                "thread2 2",
+//                "thread1 1",
+//                "nested_function 3",
+//                "thread1 1",
+//                "nested_function 3",
+//                "thread1 1",
+//                "thread2 2",
+//                "end kernel"
+//        };
+//        EXPECT_THAT(expected_message_queue, ::testing::ContainerEq(message_queue));
+//        message_queue.clear();
+//}
 
 
 uint8_t stack_one[STACK_SIZE];
