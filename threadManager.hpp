@@ -40,7 +40,7 @@ public:
 
     void loop()
     {
-        for(size_t i = 0;; i++)
+        for(uint8_t i = 0;; i++)
         {
             iter = i % threadNumber;
             Thread* currentThread = threads[iter];
