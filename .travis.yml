@@ -10,13 +10,14 @@ cache:
 directories:
              - "~/.platformio"
 env:
-- PLATFORMIO_CI_SRC=.
+- PLATFORMIO_CI_SRC= ./src
 
 install:
         sudo  pip install -U platformio
 script:
          - mkdir build
          - cd build
-         - cmake  ../ 
+         - cmake  ../
+         - cmake --build .
          - cd ..
          - platformio ci --board=uno
