@@ -34,10 +34,6 @@ public:
     ThreadManager() : iter(0) {}
     Thread *threads[threadNumber];
 
-
-
-
-
     void loop()
     {
         for(uint8_t i = 0;; i++)
