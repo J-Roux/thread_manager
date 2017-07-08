@@ -42,7 +42,7 @@ public:
             Thread* currentThread = threads[iter];
             if(currentThread)
             {
-                switch (currentThread->getState()) {
+                switch (currentThread->GetState()) {
                 case WAIT:
                 {
                     currentThread->IsThreadReady();

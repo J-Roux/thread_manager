@@ -38,7 +38,7 @@ public:
 
 
 
-void setup()
+int main()
 {
     ThreadOne thread1;
     WatchDog watchDog;
@@ -46,9 +46,5 @@ void setup()
     manager.threads[0] = &thread1;
     manager.threads[1] = &watchDog;
     manager.loop();
-}
-
-void loop()
-{
-
+    return 0;
 }

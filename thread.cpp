@@ -1,6 +1,18 @@
 #include "thread.hpp"
 
-ThreadState Thread::getState()
+
+Thread::Thread() :
+    pc(0),
+    state(INIT),
+    priority(0),
+    errorNumber(0),
+    start_time(0),
+    interval()
+{
+}
+
+
+ThreadState Thread::GetState()
 {
     return (ThreadState)state;
 }
