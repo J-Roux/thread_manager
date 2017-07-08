@@ -27,8 +27,14 @@ typedef struct
 } time_interval;
 #pragma pack()
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 time_interval get_time_interval(const clock_t* start, const clock_t* end);
 
 bool greater_interval(const time_interval* t1, const time_interval* t2);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
