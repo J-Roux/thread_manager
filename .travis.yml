@@ -9,8 +9,7 @@ cache:
        apt:true
 directories:
              - "~/.platformio"
-env:
-- PLATFORMIO_CI_SRC= ./src
+
 
 install:
         sudo  pip install -U platformio
@@ -20,4 +19,4 @@ script:
          - cmake  ../
          - cmake --build .
          - cd ..
-         - platformio ci --board=uno
+         - platformio ci --board=uno ./src
