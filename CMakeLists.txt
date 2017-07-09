@@ -1,6 +1,6 @@
 project(ThreadManager)
 cmake_minimum_required(VERSION 2.8)
-aux_source_directory(./src SRC_LIST)
-aux_source_directory(. MAIN)
+file(GLOB SRC_LIST ./src/* )
+file(GLOB MAIN ./*.cpp)
 add_executable(${PROJECT_NAME} ${SRC_LIST} ${MAIN})
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 98)

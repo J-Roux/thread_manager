@@ -1,7 +1,7 @@
 #include "src/threadManager.hpp"
 
 
-
+#include <iostream>
 class ThreadOne : public Thread
 {
     uint8_t i;
@@ -12,6 +12,7 @@ public:
         BEGIN_THREAD;
         for(this->i; i < 5; this->i++ )
         {
+            std::cout << (int)this->i << std::endl;
             WAIT_FOR(10, 0, 0);
         }
         END_THREAD;
@@ -28,6 +29,7 @@ public:
         BEGIN_THREAD;
         for(;;)
         {
+            std::cout << "hi" << std::endl;
             WAIT_FOR(5, 0, 0);
         }
         END_THREAD;
@@ -43,8 +45,8 @@ int main()
     ThreadOne thread1;
     WatchDog watchDog;
     ThreadManager<2> manager;
-    manager.threads[0] = &thread1;
-    manager.threads[1] = &watchDog;
+    manager.CreateThread(&thread1);
+    manager.CreateThread(&watchDog);
     manager.loop();
     return 0;
 }

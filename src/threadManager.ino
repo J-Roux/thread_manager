@@ -42,8 +42,8 @@ void setup()
     ThreadOne thread1;
     WatchDog watchDog;
     ThreadManager<2> manager;
-    manager.threads[0] = &thread1;
-    manager.threads[1] = &watchDog;
+    manager.CreateThread(&thread1);
+    manager.CreateThread(&watchDog);
     manager.loop();
 }
 
