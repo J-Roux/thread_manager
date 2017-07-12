@@ -1,18 +1,19 @@
 #include "src/threadManager.hpp"
-
+#include "src/stack.h"
 
 #include <iostream>
+
+
 class ThreadOne : public Thread
 {
     uint8_t i;
 public:
-    ThreadOne() : i(0), Thread() {}
+    ThreadOne(IStack<uint32_t> *stack) : i(0), Thread(stack) {}
     virtual void operator ()()
     {
         BEGIN_THREAD;
         for(this->i; i < 5; this->i++ )
         {
-            std::cout << (int)this->i << std::endl;
             WAIT_FOR(10, 0, 0);
         }
         END_THREAD;
@@ -23,13 +24,13 @@ public:
 class WatchDog : public Thread
 {
 public:
-    WatchDog() : Thread() {}
+    WatchDog(IStack<uint32_t> *stack) : Thread(stack) {}
     virtual void operator ()()
     {
         BEGIN_THREAD;
         for(;;)
         {
-            std::cout << "hi" << std::endl;
+
             WAIT_FOR(5, 0, 0);
         }
         END_THREAD;
@@ -39,11 +40,11 @@ public:
 
 
 
-
 int main()
 {
-    ThreadOne thread1;
-    WatchDog watchDog;
+    Stack<16, uint32_t> stack;
+    ThreadOne thread1(&stack);
+    WatchDog watchDog(NULL);
     ThreadManager<2> manager;
     manager.CreateThread(&thread1);
     manager.CreateThread(&watchDog);

@@ -1,12 +1,13 @@
 #include "thread.hpp"
 
 
-Thread::Thread() :
+Thread::Thread(IStack<uint32_t> *stack) :
     pc(0),
     state(INIT),
     priority(0),
     errorNumber(0),
-    endTime(0)
+    endTime(0),
+    stack(stack)
 {
 }
 
