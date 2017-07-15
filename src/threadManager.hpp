@@ -7,13 +7,10 @@
 #define END_THREAD         } this->state = TERMINATE;
 #define YIELD             case __COUNTER__: this->pc = __COUNTER__ + 1; return; case __COUNTER__:
 
-#define WAIT_FOR(SEC, USEC, MICRO_SEC) SetTimer(clock() + \
-                                                clock_t((float(SEC) + \
-                                                         float(USEC / 1000) + \
-                                                         float(MICRO_SEC / 1000000)) * \
-                                                CLOCKS_PER_SEC));  \
+#define WAIT_FOR(SEC, MSEC, USEC) this->SetEvent(Event(timeToClock(SEC, MSEC, USEC)));  \
                                                 YIELD;
 
+clock_t timeToClock(uint32_t sec, uint32_t msec, uint32_t usec);
 
 const uint8_t Zero = __COUNTER__;
 
@@ -35,11 +32,11 @@ class ThreadManager
         return isEnd;
     }
 
-    Thread *threads[threadNumber];
+    IThread *threads[threadNumber];
 public:
     ThreadManager() : iter(0), threads() {}
 
-    bool CreateThread(Thread* thread)
+    bool CreateThread(IThread* thread)
     {
         for(uint8_t i = 0; i < threadNumber; i++)
         {
@@ -57,17 +54,17 @@ public:
         for(uint8_t i = 0;; i++)
         {
             iter = i % threadNumber;
-            Thread* currentThread = threads[iter];
+            IThread* currentThread = threads[iter];
             if(currentThread)
             {
                 switch (currentThread->GetState()) {
+                case INIT:
+                case RUNNING: (*currentThread)();  break;
                 case WAIT:
                 {
                     currentThread->IsWaiting();
                     break;
                 }
-                case INIT:
-                case RUNNING: (*currentThread)();  break;
                 case TERMINATE:{
                      threads[iter] = NULL;
                 }

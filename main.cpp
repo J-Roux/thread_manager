@@ -4,33 +4,35 @@
 #include <iostream>
 
 
-class ThreadOne : public Thread
+class ThreadOne : public IThread
 {
     uint8_t i;
 public:
-    ThreadOne(IStack<uint32_t> *stack) : i(0), Thread(stack) {}
+    ThreadOne(IStack<uint32_t> *stack) : i(0), IThread(stack) {}
     virtual void operator ()()
     {
         BEGIN_THREAD;
-        for(this->i; i < 5; this->i++ )
+        for(this->i; i < 6; this->i++ )
         {
-            WAIT_FOR(10, 0, 0);
+            WAIT_FOR(1, 0, 0);
         }
         END_THREAD;
     }
+
+
+
     virtual ~ThreadOne() {}
 };
 
-class WatchDog : public Thread
+class WatchDog : public IThread
 {
 public:
-    WatchDog(IStack<uint32_t> *stack) : Thread(stack) {}
+    WatchDog(IStack<uint32_t> *stack) : IThread(stack) {}
     virtual void operator ()()
     {
         BEGIN_THREAD;
         for(;;)
         {
-
             WAIT_FOR(5, 0, 0);
         }
         END_THREAD;
@@ -51,3 +53,4 @@ int main()
     manager.loop();
     return 0;
 }
+

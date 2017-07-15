@@ -1,33 +1,42 @@
 #include "thread.hpp"
 
 
-Thread::Thread(IStack<uint32_t> *stack) :
+IThread::IThread(IStack<uint32_t> *stack) :
     pc(0),
     state(INIT),
     priority(0),
     errorNumber(0),
-    endTime(0),
     stack(stack)
 {
 }
 
 
-ThreadState Thread::GetState() const
+ThreadState IThread::GetState() const
 {
     return (ThreadState)state;
 }
 
-void Thread::SetTimer(clock_t endTime)
+void IThread::SaveContext()
 {
-    this->endTime = endTime;
+
+}
+
+void IThread::LoadContext()
+{
+
+}
+
+void IThread::SetEvent(const Event &event)
+{
+    this->event = event;
     this->state = WAIT;
 }
 
-void Thread::IsWaiting()
+
+void IThread::IsWaiting()
 {
-    if(this->endTime < clock())
+    if(event.isSet())
     {
-        this->endTime = 0;
         this->state = RUNNING;
     }
 }
